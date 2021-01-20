@@ -339,3 +339,19 @@ void config_print(void) {
 	// printf("\tBT Mode\t\t%02X\r\n", config_bluetooth_mode);
 	// printf("\tBaudrate\t%02X\r\n", config_serial_baudrate);
 }
+
+void config_test_tone_1200_enable(void) {
+	config_output_tone_1200 = true;
+}
+
+void config_test_tone_1200_disable(void) {
+	config_output_tone_1200 = false;
+}
+
+void config_test_tone_2200_enable(void) {
+	config_output_tone_2200 = true;
+}
+
+void config_test_tone_2200_disable(void) {
+	config_output_tone_2200 = false;
+}

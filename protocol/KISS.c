@@ -622,6 +622,17 @@ void kiss_serialCallback(uint8_t sbyte) {
                 }
                 config_set_invert_sddetect(sbyte);
             }
+        } else if (command == CMD_TEST_TONE) {
+            if (sbyte == 0x01) {
+                config_test_tone_2200_disable();
+                config_test_tone_1200_enable();
+            } else if (sbyte == 0x02) {
+                config_test_tone_1200_disable();
+                config_test_tone_2200_enable();
+            } else {
+                config_test_tone_1200_disable();
+                config_test_tone_2200_disable();
+            }
         }
     }
 }

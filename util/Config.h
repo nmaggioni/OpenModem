@@ -78,6 +78,8 @@ bool config_invert_sddetect;
 
 bool config_user_jobs_enabled;
 bool config_output_diagnostics;
+bool config_output_tone_1200;
+bool config_output_tone_2200;
 
 bool config_sensors_enabled;
 int32_t config_sensor_interval_ms;
@@ -122,6 +124,11 @@ void config_print(void);
 void EEPROM_updatebyte(uint16_t addr, uint8_t data);
 uint8_t EEPROM_readbyte(uint16_t addr);
 void EEPROM_writebyte(uint16_t addr, uint8_t data);
+
+void config_test_tone_1200_enable(void);
+void config_test_tone_1200_disable(void);
+void config_test_tone_2200_enable(void);
+void config_test_tone_2200_disable(void);
 
 #endif
 

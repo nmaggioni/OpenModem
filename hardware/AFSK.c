@@ -21,6 +21,10 @@ uint16_t peak_ticks = 0;
 int afsk_getchar(FILE *strem);
 int afsk_putchar(char c, FILE *stream);
 
+#define ANGLE_ON_SAMPLE_1200 SIN_LEN / (CONFIG_DAC_SAMPLERATE / 1200)
+#define ANGLE_ON_SAMPLE_2200 (SIN_LEN / (CONFIG_DAC_SAMPLERATE / 2200)) -5;
+uint16_t tone_phase = 0;
+
 // ADC and clock setup
 void AFSK_hw_init(void) {
     _clock = 0;
@@ -561,16 +565,41 @@ inline void timed_functions(void) {
 }
 
 ISR(TIMER3_CAPT_vect) {
-    if (hw_afsk_dac_isr) {
-        DAC_PORT = AFSK_dac_isr(AFSK_modem);
-        LED_TX_ON();
-        PTT_PORT |= _BV(PTT_PIN);
-        PTT_PORT &= ~_BV(PTT_NEG_PIN);
+    if (config_output_diagnostics) {
+        if (tone_phase > SIN_LEN) {
+            tone_phase %= SIN_LEN;
+        }
+
+        if (config_output_tone_1200 || config_output_tone_2200) {
+            LED_TX_ON();
+            DAC_PORT = sinSample(tone_phase);
+            PTT_PORT |= _BV(PTT_PIN);
+            PTT_PORT &= ~_BV(PTT_NEG_PIN);
+        } else {
+            LED_TX_OFF();
+            DAC_PORT = 127;
+            PTT_PORT &= ~_BV(PTT_PIN);
+            PTT_PORT |= _BV(PTT_NEG_PIN);
+        }
+
+        if (config_output_tone_1200) {
+            tone_phase += ANGLE_ON_SAMPLE_1200;
+        } else if (config_output_tone_2200) {
+            tone_phase += ANGLE_ON_SAMPLE_2200;
+        }
+
     } else {
-        LED_TX_OFF();
-        DAC_PORT = 127;
-        PTT_PORT &= ~_BV(PTT_PIN);
-        PTT_PORT |= _BV(PTT_NEG_PIN);
+        if (hw_afsk_dac_isr) {
+            DAC_PORT = AFSK_dac_isr(AFSK_modem);
+            LED_TX_ON();
+            PTT_PORT |= _BV(PTT_PIN);
+            PTT_PORT &= ~_BV(PTT_NEG_PIN);
+        } else {
+            LED_TX_OFF();
+            DAC_PORT = 127;
+            PTT_PORT &= ~_BV(PTT_PIN);
+            PTT_PORT |= _BV(PTT_NEG_PIN);
+        }
     }
 }
 
