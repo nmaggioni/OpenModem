@@ -39,7 +39,7 @@ Modifications copyright 2019 Mark Qvist
 #define MUL(x,y) aes_GaloisFieldMultiply((x),(y))
 #define MUL2(x)  (((x) << 1) ^ (0x1B & (((x) >> 7) * 0xFF))) & 0xFF
 #define MUL3(x)  ((x) ^ MUL2(x))
-#define SUB4(x)  (((uint32_t)pgm_read_byte(&(s_box[((x) & 0xFF000000) >> 24])) << 24) | ((uint32_t)pgm_read_byte(&(s_box[((x) & 0xFF0000) >> 16])) << 16) | (pgm_read_byte(&(s_box[((x) & 0xFF00) >> 8])) << 8) | pgm_read_byte(&(s_box[((x) & 0xFF)])))
+#define SUB4(x)  (((uint32_t)pgm_read_byte(&(s_box[((x) & 0xFF000000) >> 24])) << 24) | ((uint32_t)pgm_read_byte(&(s_box[((x) & 0xFF0000) >> 16])) << 16) | ((uint32_t)pgm_read_byte(&(s_box[((x) & 0xFF00) >> 8])) << 8) | ((uint32_t)pgm_read_byte(&(s_box[((x) & 0xFF)]))))
 
 // AES Tables
 const uint8_t s_box[256] PROGMEM = {

@@ -377,10 +377,10 @@ void kiss_flushQueue(void) {
                                 }
 
                                 for (uint8_t j = CRYPTO_KEY_SIZE - padding; j < CRYPTO_KEY_SIZE; j++) {
-                                    crypto_work_block[j] = 0xFF;
+                                    crypto_work_block[j] = padding;
                                 }
                             }
-                            
+
                             crypto_encrypt_block(crypto_work_block);
 
                             for (uint8_t j = 0; j < CRYPTO_KEY_SIZE; j++) {
