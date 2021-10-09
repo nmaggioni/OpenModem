@@ -14,16 +14,17 @@ char nmea_input_buf[NMEA_MAX_LENGTH];
 char nmea_parse_buf[NMEA_MAX_LENGTH];
 
 bool gps_detect(void) {
-	GPS_DDR &= ~_BV(GPS_EN_PIN);
-	return (GPS_INPUT & _BV(GPS_EN_PIN));
+	//GPS_DDR &= ~_BV(GPS_EN_PIN);
+	//return (GPS_INPUT & _BV(GPS_EN_PIN));
+	return true;
 }
 
 void gps_powerup(void) {
-	GPS_PORT |= _BV(GPS_EN_PIN);
+	//GPS_PORT |= _BV(GPS_EN_PIN);
 }
 
 void gps_powerdown(void) {
-	GPS_PORT &= ~_BV(GPS_EN_PIN);
+	//GPS_PORT &= ~_BV(GPS_EN_PIN);
 }
 
 bool gps_enabled(void) {
@@ -44,7 +45,7 @@ void gps_init(Serial *ser) {
 
 	if (gps_detect()) {
 		gps_installed = true;
-		GPS_DDR |= _BV(GPS_EN_PIN);
+		//GPS_DDR |= _BV(GPS_EN_PIN);
 
 		if (config_gps_mode == CONFIG_GPS_AUTODETECT || config_gps_mode == CONFIG_GPS_REQUIRED) {
 			gps_powerup();
