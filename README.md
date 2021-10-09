@@ -21,3 +21,22 @@ Complete modems are available from [the unsigned.io shop](http://unsigned.io/sho
 ## Usage
 
 Please refer to the manual and instructions posted at the [OpenModem page](https://unsigned.io/openmodem/). The default serial connection settings are 115200 baud, 8N1. For configuring the modem, please see the OpenModem Config Utility.
+
+## Compiling with Docker
+
+1. Build the image:
+
+   ```bash
+   docker build -t openmodembuild .
+   ```
+
+2. Run the image:
+
+   ```bash
+   docker run -it --rm -v "$PWD":/src openmodembuild
+   ```
+
+   + Treat the above command as a `make` replacement, for example to invoke the `clean` target with 8 processes:
+   ```bash
+   docker run -it --rm -v "$PWD":/src openmodembuild -j 8 clean
+   ```
