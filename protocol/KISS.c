@@ -5,9 +5,11 @@
 #include "hardware/Serial.h"
 #include "hardware/LED.h"
 #include "hardware/Crypto.h"
+#include "hardware/GPS.h"
 #include "util/FIFO16.h"
 #include "util/time.h"
 #include "util/Config.h"
+#include "util/macros.h"
 #include "KISS.h"
 
 uint8_t packet_queue[CONFIG_QUEUE_SIZE];
@@ -65,6 +67,18 @@ void kiss_poll(void) {
         char sbyte = fifo_pop_locked(&uart0FIFO);
         kiss_serialCallback(sbyte);
         last_serial_read = timer_clock();
+    }
+}
+
+void kiss_put_escaped_char(uint8_t b) {
+    if (b == FEND) {
+        fputc(FESC, &serial->uart0);
+        fputc(TFEND, &serial->uart0);
+    } else if (b == FESC) {
+        fputc(FESC, &serial->uart0);
+        fputc(TFESC, &serial->uart0);
+    } else {
+        fputc(b, &serial->uart0);
     }
 }
 
@@ -139,16 +153,7 @@ void kiss_messageCallback(AX25Ctx *ctx) {
             fputc(FEND, &serial->uart0);
             fputc(0x00, &serial->uart0);
             for (unsigned i = 0; i < ctx->frame_len-2; i++) {
-                uint8_t b = ctx->buf[i];
-                if (b == FEND) {
-                    fputc(FESC, &serial->uart0);
-                    fputc(TFEND, &serial->uart0);
-                } else if (b == FESC) {
-                    fputc(FESC, &serial->uart0);
-                    fputc(TFESC, &serial->uart0);
-                } else {
-                    fputc(b, &serial->uart0);
-                }
+                kiss_put_escaped_char(ctx->buf[i]);
             }
             fputc(FEND, &serial->uart0);
 
@@ -633,8 +638,56 @@ void kiss_serialCallback(uint8_t sbyte) {
                 config_test_tone_1200_disable();
                 config_test_tone_2200_disable();
             }
+        } else if (command == CMD_GPS_POSITION) {
+            kiss_output_gps_position();
+        } else if (command == CMD_GPS_TIME) {
+            kiss_output_gps_time();
         }
     }
+}
+
+void kiss_output_gps_position(void) {
+    /* Sent as escaped bytes:
+     * (bool => uint8_t) fix [0 bad, 1 ok]
+     * (float => uint8_t[4]) latitude [check endianness?]
+     * (char => uint8_t) latitude sign ['N' = +; 'S' = -]
+     * (float => uint8_t[4]) longitude [check endianness?]
+     * (char => uint8_t) longitude sign ['E' = +; 'W' = -]
+     * (float => uint8_t[4]) altitude [check endianness?]
+     */
+    union {
+        float f;
+        uint8_t b[4];
+    } float2bytes;
+
+    fputc(FEND, &serial->uart0);
+    fputc(CMD_GPS_POSITION, &serial->uart0);
+    kiss_put_escaped_char(gps_fix);
+    float2bytes.f = gps_lat;
+    for (int i = 0; i < ARRLEN(float2bytes.b); ++i) {
+        kiss_put_escaped_char(float2bytes.b[i]);
+    }
+    kiss_put_escaped_char(gps_lat_sign);
+    float2bytes.f = gps_lon;
+    for (int i = 0; i < ARRLEN(float2bytes.b); ++i) {
+        kiss_put_escaped_char(float2bytes.b[i]);
+    }
+    kiss_put_escaped_char(gps_lon_sign);
+    float2bytes.f = gps_altitude;
+    for (int i = 0; i < ARRLEN(float2bytes.b); ++i) {
+        kiss_put_escaped_char(float2bytes.b[i]);
+    }
+    fputc(FEND, &serial->uart0);
+}
+
+void kiss_output_gps_time(void) {
+    fputc(FEND, &serial->uart0);
+    fputc(CMD_GPS_TIME, &serial->uart0);
+    uint8_t time[] = { gps_t_hour, gps_t_minute };
+    for (unsigned i = 0; i < ARRLEN(time); ++i) {
+        kiss_put_escaped_char(time[i]);
+    }
+    fputc(FEND, &serial->uart0);
 }
 
 void kiss_output_modem_mode(void) {
@@ -653,18 +706,7 @@ void kiss_output_modem_mode(void) {
 void kiss_output_afsk_peak(void) {
     fputc(FEND, &serial->uart0);
     fputc(CMD_AUDIO_PEAK, &serial->uart0);
-    uint8_t b = afsk_peak;
-
-    if (b == FEND) {
-        fputc(FESC, &serial->uart0);
-        fputc(TFEND, &serial->uart0);
-    } else if (b == FESC) {
-        fputc(FESC, &serial->uart0);
-        fputc(TFESC, &serial->uart0);
-    } else {
-        fputc(b, &serial->uart0);
-    }
-
+    kiss_put_escaped_char(afsk_peak);
     fputc(FEND, &serial->uart0);
 }
 
@@ -672,16 +714,7 @@ void kiss_output_nmea(char* data, size_t length) {
     fputc(FEND, &serial->uart0);
     fputc(CMD_NMEA, &serial->uart0);
     for (unsigned i = 0; i < length; i++) {
-        uint8_t b = data[i];
-        if (b == FEND) {
-            fputc(FESC, &serial->uart0);
-            fputc(TFEND, &serial->uart0);
-        } else if (b == FESC) {
-            fputc(FESC, &serial->uart0);
-            fputc(TFESC, &serial->uart0);
-        } else {
-            fputc(b, &serial->uart0);
-        }
+        kiss_put_escaped_char(data[i]);
     }
     fputc(FEND, &serial->uart0);
 }
@@ -690,16 +723,7 @@ void kiss_output_config(uint8_t* data, size_t length) {
     fputc(FEND, &serial->uart0);
     fputc(CMD_PRINT_CONFIG, &serial->uart0);
     for (unsigned i = 0; i < length; i++) {
-        uint8_t b = data[i];
-        if (b == FEND) {
-            fputc(FESC, &serial->uart0);
-            fputc(TFEND, &serial->uart0);
-        } else if (b == FESC) {
-            fputc(FESC, &serial->uart0);
-            fputc(TFESC, &serial->uart0);
-        } else {
-            fputc(b, &serial->uart0);
-        }
+        kiss_put_escaped_char(data[i]);
     }
     fputc(FEND, &serial->uart0);
 }

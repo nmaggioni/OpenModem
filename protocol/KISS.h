@@ -39,6 +39,8 @@
 #define CMD_RETURN 0xFF
 #define CMD_INVERT_SDDETECT 0x15
 #define CMD_TEST_TONE 0x16
+#define CMD_GPS_POSITION 0x17
+#define CMD_GPS_TIME 0x18
 
 void kiss_init(AX25Ctx *ax25, Afsk *afsk, Serial *ser);
 void kiss_messageCallback(AX25Ctx *ctx);
@@ -51,6 +53,8 @@ void kiss_output_modem_mode(void);
 void kiss_output_afsk_peak(void);
 void kiss_output_config(uint8_t* data, size_t length);
 void kiss_output_nmea(char* data, size_t length);
+void kiss_output_gps_position(void);
+void kiss_output_gps_time(void);
 
 bool log_init(void);
 bool load_log_index(void);

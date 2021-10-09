@@ -8,8 +8,9 @@
 #include "hardware/AFSK.h"
 #include "protocol/KISS.h"
 #include "util/Config.h"
+#include "util/macros.h"
 
-#define countof(a) sizeof(a)/sizeof(a[0])
+
 #define MIN(a,b) ({ typeof(a) _a = (a); typeof(b) _b = (b); ((typeof(_a))((_a < _b) ? _a : _b)); })
 #define DECODE_CALL(buf, addr) for (unsigned i = 0; i < sizeof((addr)); i++) { char c = (*(buf)++ >> 1); (addr)[i] = (c == ' ') ? '\x0' : c; }
 #define AX25_SET_REPEATED(msg, idx, val) do { if (val) { (msg)->rpt_flags |= _BV(idx); } else { (msg)->rpt_flags &= ~_BV(idx) ; } } while(0)
