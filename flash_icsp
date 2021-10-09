@@ -1,0 +1,2 @@
+#!/bin/bash
+avrdude -p m1284p -c usbasp -U flash:w:images/OpenModem.hex:i
