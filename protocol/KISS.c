@@ -642,6 +642,8 @@ void kiss_serialCallback(uint8_t sbyte) {
             kiss_output_gps_position();
         } else if (command == CMD_GPS_TIME) {
             kiss_output_gps_time();
+        } else if (command == CMD_PING) {
+            kiss_put_escaped_char(FEND);
         }
     }
 }

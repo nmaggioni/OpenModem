@@ -41,6 +41,7 @@
 #define CMD_TEST_TONE 0x16
 #define CMD_GPS_POSITION 0x17
 #define CMD_GPS_TIME 0x18
+#define CMD_PING 0x19
 
 void kiss_init(AX25Ctx *ax25, Afsk *afsk, Serial *ser);
 void kiss_messageCallback(AX25Ctx *ctx);
