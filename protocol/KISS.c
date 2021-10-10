@@ -643,7 +643,7 @@ void kiss_serialCallback(uint8_t sbyte) {
         } else if (command == CMD_GPS_TIME) {
             kiss_output_gps_time();
         } else if (command == CMD_PING) {
-            kiss_put_escaped_char(FEND);
+            kiss_output_ping();
         }
     }
 }
@@ -689,6 +689,12 @@ void kiss_output_gps_time(void) {
     for (unsigned i = 0; i < ARRLEN(time); ++i) {
         kiss_put_escaped_char(time[i]);
     }
+    fputc(FEND, &serial->uart0);
+}
+
+void kiss_output_ping(void) {
+    fputc(FEND, &serial->uart0);
+    kiss_put_escaped_char(FEND);
     fputc(FEND, &serial->uart0);
 }
 

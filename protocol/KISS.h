@@ -56,6 +56,7 @@ void kiss_output_config(uint8_t* data, size_t length);
 void kiss_output_nmea(char* data, size_t length);
 void kiss_output_gps_position(void);
 void kiss_output_gps_time(void);
+void kiss_output_ping(void);
 
 bool log_init(void);
 bool load_log_index(void);
