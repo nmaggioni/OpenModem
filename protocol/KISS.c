@@ -694,7 +694,8 @@ void kiss_output_gps_time(void) {
 
 void kiss_output_ping(void) {
     fputc(FEND, &serial->uart0);
-    kiss_put_escaped_char(FEND);
+    fputc(CMD_PING, &serial->uart0);
+    fputc(0x42, &serial->uart0);
     fputc(FEND, &serial->uart0);
 }
 
