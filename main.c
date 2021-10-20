@@ -45,12 +45,15 @@ void system_check(void) {
       boot_vector = START_FROM_POWERON;
     } else if (OPTIBOOT_MCUSR & (1<<BORF)) {
       boot_vector = START_FROM_BROWNOUT;
+    } else if (OPTIBOOT_MCUSR & (1<<EXTRF)) {
+      boot_vector = START_FROM_RESET;
     } else if (OPTIBOOT_MCUSR & (1<<WDRF)) {
       boot_vector = START_FROM_BOOTLOADER;
+    } else if (OPTIBOOT_MCUSR & (1<<JTRF)) {
+      boot_vector = START_FROM_JTAG;
     } else {
-        printf(PSTR("Error, indeterminate boot vector %d\r\n"), OPTIBOOT_MCUSR);
-        printf(PSTR("System start has been halted\r\n"));
         while (true) {
+            printf("System start halted, boot vector: %02x\r\n", OPTIBOOT_MCUSR);
             LED_TX_ON();
             LED_COM_ON();
         }
