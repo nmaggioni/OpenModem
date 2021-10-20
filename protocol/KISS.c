@@ -651,11 +651,9 @@ void kiss_serialCallback(uint8_t sbyte) {
 void kiss_output_gps_position(void) {
     /* Sent as escaped bytes:
      * (bool => uint8_t) fix [0 bad, 1 ok]
-     * (float => uint8_t[4]) latitude [check endianness?]
-     * (char => uint8_t) latitude sign ['N' = +; 'S' = -]
-     * (float => uint8_t[4]) longitude [check endianness?]
-     * (char => uint8_t) longitude sign ['E' = +; 'W' = -]
-     * (float => uint8_t[4]) altitude [check endianness?]
+     * (float => uint8_t[4]) latitude
+     * (float => uint8_t[4]) longitude
+     * (float => uint8_t[4]) altitude
      */
     union {
         float f;
@@ -669,12 +667,10 @@ void kiss_output_gps_position(void) {
     for (int i = 0; i < ARRLEN(float2bytes.b); ++i) {
         kiss_put_escaped_char(float2bytes.b[i]);
     }
-    kiss_put_escaped_char(gps_lat_sign);
     float2bytes.f = gps_lon;
     for (int i = 0; i < ARRLEN(float2bytes.b); ++i) {
         kiss_put_escaped_char(float2bytes.b[i]);
     }
-    kiss_put_escaped_char(gps_lon_sign);
     float2bytes.f = gps_altitude;
     for (int i = 0; i < ARRLEN(float2bytes.b); ++i) {
         kiss_put_escaped_char(float2bytes.b[i]);
